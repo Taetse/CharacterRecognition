@@ -17,6 +17,12 @@ public class NeuralNetwork {
     private EpochManager epochManager = new EpochManager();
 
     private class EpochManager {
+        EpochManager() {
+            prev = new Epoch();
+            current = new Epoch();
+            next = new Epoch();
+        }
+
         public int count = 0;
         public Epoch prev = null;
         public Epoch current = null;
@@ -26,7 +32,7 @@ public class NeuralNetwork {
             count++;
             prev = current;
             current = next;
-            next = null;
+            next = new Epoch();
         }
     }
 
@@ -55,12 +61,12 @@ public class NeuralNetwork {
 
         for (int j = 0; j < J; j++) {
             for (int i = 0; i < I; i++)
-                v[j][i] = getRandomValue(-(1/I), (1/I));
+                v[j][i] = getRandomValue(-(1.0/I), (1.0/I));
         }
 
         for (int k = 0; k < K; k++) {
             for (int j = 0; j < J; j++)
-                w[k][j] = getRandomValue(-(1/J), (1/J));
+                w[k][j] = getRandomValue(-(1.0/J), (1.0/J));
         }
         epochManager.current.v = v;
         epochManager.current.w = w;
@@ -84,7 +90,6 @@ public class NeuralNetwork {
         double trainingAccuracy = 0;
         while (!criteriaMet) {
             trainingError = 0;
-            epochManager.nextEpoch();
 
             for (InputVector inputVector : inputVectors) {
                 boolean missClassification = false;
@@ -123,6 +128,8 @@ public class NeuralNetwork {
             }
 
             criteriaMet = (epochManager.count >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
+            epochManager.nextEpoch();
+            System.out.println("Epoch " + epochManager.count + " done. Accuracy: " + trainingAccuracy);
         }
         return trainingAccuracy;
     }
@@ -189,14 +196,14 @@ public class NeuralNetwork {
 
     private double NetYJ(int j, double inputs[]) {
         double net = 0;
-        for (int x = 0; x < I + 1; x++)
+        for (int x = 0; x < I; x++)
             net += (epochManager.current.v[j][x] * inputs[x]);
         return net;
     }
 
     private double NetOK(int k, double inputs[]) {
         double net = 0;
-        for (int x = 0; x < J + 1; x++)
+        for (int x = 0; x < J; x++)
             net += (epochManager.current.w[k][x] * inputs[x]);
         return net;
     }

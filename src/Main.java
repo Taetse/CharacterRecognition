@@ -9,9 +9,9 @@ public class Main {
         InputVector[] inputVectors = getInputVectors("letter-recognition.data");
         normalizeVectors(inputVectors);
 
-        NeuralNetwork neuralNetwork = new Experiment3(inputVectors);
+        Experiment neuralNetwork = new Experiment3(inputVectors);
         System.out.println("Accuracy: ");
-        System.out.println(((Experiment3) neuralNetwork).start());
+        System.out.println((neuralNetwork).start());
     }
 
     private static void normalizeVectors(InputVector[] vectors) {
@@ -42,7 +42,7 @@ public class Main {
             InputVector inputVector = new InputVector();
             double attributes[] = new double[16];
             for (int a = 1; a < split.length; a++)
-                attributes[a] = Integer.parseInt(split[a]);
+                attributes[a - 1] = Integer.parseInt(split[a]);
             inputVector.vector = attributes;
             inputVector.classChar = split[0].charAt(0);
             inputVectors[index++] = inputVector;
