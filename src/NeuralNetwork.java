@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class NeuralNetwork {
-    private ArrayList<InputVector> inputVectors;
+    private InputVector[] inputVectors;
     private int J;
     private int K;
     private int I;
@@ -68,15 +68,14 @@ public class NeuralNetwork {
         epochManager.prev.deltaw = new double[K][J];
     }
 
-    public void initControlVariables(double learningRate, double momentum, double trainingError, int maxEpoch, double desiredTrainingAccuracy) {
+    public void initControlVariables(double learningRate, double momentum, int maxEpoch, double desiredTrainingAccuracy) {
         this.learningRate = learningRate;
         this.momentum = momentum;
-        this.trainingError = trainingError;
         this.maxEpoch = maxEpoch;
         this.desiredTrainingAccuracy = desiredTrainingAccuracy;
     }
 
-    public void setInputVectors(ArrayList<InputVector> inputVectors) {
+    public void setInputVectors(InputVector[] inputVectors) {
         this.inputVectors = inputVectors;
     }
 
@@ -120,7 +119,7 @@ public class NeuralNetwork {
                 epochManager.current.deltav = calculateDeltaV(errorY);
                 epochManager.next.v = calculateVNextEpoch();
 
-                trainingAccuracy = (trainingError / inputVectors.size()) * 100;
+                trainingAccuracy = (trainingError / inputVectors.length) * 100;
             }
 
             criteriaMet = (epochManager.count >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
