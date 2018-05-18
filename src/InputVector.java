@@ -1,4 +1,5 @@
 public class InputVector {
     char classChar;
-    int vector[] = new int[16];
+    double vector[] = new double[16];
+    int target[];
 }
