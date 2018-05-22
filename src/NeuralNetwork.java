@@ -14,18 +14,16 @@ public class NeuralNetwork {
     private int maxEpoch;
     private double desiredTrainingAccuracy;
     private double v[][];
-    private double nextv[][];
     private double w[][];
-    private double nextw[][];
     private double deltav[][];
     private double prevDeltav[][];
     private double deltaw[][];
     private double prevDeltaw[][];
 
-    NeuralNetwork(int inputUnitCount, int hiddenUnitCount, int outputUniCount) {
+    NeuralNetwork(int inputUnitCount, int hiddenUnitCount, int outputUnitCount) {
         I = inputUnitCount + 1;
         J = hiddenUnitCount + 1;
-        K = outputUniCount;
+        K = outputUnitCount;
 
         z = new double[I];
         y = new double[J];
@@ -37,19 +35,18 @@ public class NeuralNetwork {
         v = new double[J][I]; //hidden units x input units + bias unit
         w = new double[K][J]; //hidden units x input units + bias unit
 
-        for (int j = 0; j < J; j++) {
-            for (int i = 0; i < I; i++)
-//                v[j][i] = 0.2;
-                v[j][i] = getRandomValue(-(1.0/Math.sqrt(I)), (1.0/Math.sqrt(I)));
-        }
-
-        for (int k = 0; k < K; k++) {
-            for (int j = 0; j < J; j++)
-//                w[k][j] = 0.5;
-                w[k][j] = getRandomValue(-(1.0/Math.sqrt(J)), (1.0/Math.sqrt(J)));
-        }
         prevDeltav = new double[J][I];
+        deltav = new double[J][I];
         prevDeltaw = new double[K][J];
+        deltaw = new double[K][J];
+
+        for (int j = 0; j < J; j++)
+            for (int i = 0; i < I; i++)
+                v[j][i] = getRandomValue(-(1.0/Math.sqrt(I)), (1.0/Math.sqrt(I)));
+
+        for (int k = 0; k < K; k++)
+            for (int j = 0; j < J; j++)
+                w[k][j] = getRandomValue(-(1.0/Math.sqrt(J)), (1.0/Math.sqrt(J)));
     }
 
     public void initControlVariables(double learningRate, double momentum, int maxEpoch, double desiredTrainingAccuracy) {
@@ -72,45 +69,32 @@ public class NeuralNetwork {
             trainingError = 0;
 
             for (InputVector inputVector : inputVectors) {
-                boolean correctlyClassified = true;
                 calculateZ(inputVector);
                 calculateY();
                 calculateO();
-                correctlyClassified = !calculateA();
-
-                //training error
-                correctlyClassified = correctlyClassified && !missClassification(inputVector.t);
-                if (correctlyClassified)
+                boolean correctlyClassified = !calculateA();
+                if (correctlyClassified && !missClassification(inputVector.t))
                     trainingError++;
 
-                //Calculate the error signal for each output
-                double errorO[] = calculateOutputErrorSignal(inputVector.t);
+                double errorO[] = calculateErrorO(inputVector.t);
+                double errorY[] = calculateErrorY(errorO);
 
-                //Calculate the new weight values for the hidden-to-output weights
-                deltaw = calculateDeltaW(errorO);
-                nextw = calculateW();
+                calculateDeltaW(errorO);
+                calculateDeltaV(errorY);
 
-                //calculate the error signal for each hidden unit
-                double errorY[] = calculateHiddenErrorSignal(errorO);
+                calculateW();
+                calculateV();
 
-                //Calculate the new weight values for the weights between hidden neuron j and input neuron i
-                deltav = calculateDeltaV(errorY);
-                nextv = calculateV();
-
-                trainingAccuracy = (trainingError / inputVectors.length) * 100;
-
+                double temp[][] = prevDeltaw;
                 prevDeltaw = deltaw;
+                deltaw = temp;
+                temp = prevDeltav;
                 prevDeltav = deltav;
-                w = nextw;
-                v = nextv;
-
-//                printV();
-//                printW();
-//                System.out.println("done");
+                deltav = temp;
             }
+            trainingAccuracy = (trainingError / inputVectors.length) * 100;
 
             criteriaMet = (epochCount >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
-//            printNetwork();
             epochCount++;
             System.out.println("Epoch " + epochCount + " done. Accuracy: " + trainingAccuracy);
         }
@@ -144,52 +128,39 @@ public class NeuralNetwork {
         return classEr;
     }
 
-    private double[][] calculateV() {
-        double[][] v = new double[J][I];
-        for (int j = 0; j < J; j++) {
+    private void calculateV() {
+        for (int j = 0; j < J; j++)
             for (int i = 0; i < I; i++)
-                v[j][i] = v[j][i] * deltav[j][i] + (momentum * prevDeltav[j][i]);
-        }
-        return v;
+                v[j][i] += + deltav[j][i] + (momentum * prevDeltav[j][i]);
     }
 
-    private double[][] calculateDeltaV(double errorY[]) {
-        double[][] deltaV = new double[J][I];
-        for (int j = 0; j < J; j++) {
+    private void calculateDeltaV(double errorY[]) {
+        for (int j = 0; j < J; j++)
             for (int i = 0; i < I; i++)
-                deltaV[j][i] = -learningRate * errorY[j] * z[i];
-        }
-        return deltaV;
+                deltav[j][i] = -learningRate * errorY[j] * z[i];
     }
 
-    private double[] calculateHiddenErrorSignal(double errorO[]) {
+    private double[] calculateErrorY(double errorO[]) {
         double errorY[] = new double[J];
-        for (int j = 0; j < J; j++) {
+        for (int j = 0; j < J; j++)
             for (int k = 0; k < K; k++)
-                errorY[j] = errorO[k] * w[k][j] * (1 - y[j]) * y[j];
-        }
+                errorY[j] += errorO[k] * w[k][j] * (1 - y[j]) * y[j];
         return errorY;
     }
 
-    private double[][] calculateW() {
-        double[][] w = new double[K][J];
-        for (int k = 0; k < K; k++) {
+    private void calculateW() {
+        for (int k = 0; k < K; k++)
             for (int j = 0; j < J; j++)
-                w[k][j] = w[k][j] + deltaw[k][j] + momentum * prevDeltaw[k][j];
-        }
-        return w;
+                w[k][j] += deltaw[k][j] + momentum * prevDeltaw[k][j];
     }
 
-    private double[][] calculateDeltaW(double errorO[]) {
-        double[][] deltaW = new double[K][J];
-        for (int k = 0; k < K; k++) {
+    private void calculateDeltaW(double errorO[]) {
+        for (int k = 0; k < K; k++)
             for (int j = 0; j < J; j++)
-                deltaW[k][j] = -learningRate * errorO[k] * y[j];
-        }
-        return deltaW;
+                deltaw[k][j] = -learningRate * errorO[k] * y[j];
     }
 
-    private double[] calculateOutputErrorSignal(int t[]) {
+    private double[] calculateErrorO(int t[]) {
         double errorO[] = new double[K];
         for (int k = 0; k < K; k++)
             errorO[k] = -(t[k] - o[k]) * (1 - o[k]) * o[k];
@@ -197,8 +168,8 @@ public class NeuralNetwork {
     }
 
     private boolean missClassification(int t[]) {
-        for (int a = 0; a < K; a++)
-            if (o[a] != t[a])
+        for (int k = 0; k < K; k++)
+            if (a[k] != t[k])
                 return true;
         return false;
     }
