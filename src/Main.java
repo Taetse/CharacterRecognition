@@ -7,6 +7,7 @@ import java.util.ArrayList;
 public class Main {
     public static void main(String strings[]) {
         InputVector[] inputVectors = getInputVectors("letter-recognition.data");
+//        InputVector[] inputVectors = getInputVectors("test.data");
         normalizeVectors(inputVectors);
 
         Experiment neuralNetwork = new Experiment3(inputVectors);

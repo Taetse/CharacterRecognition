@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-
 public class NeuralNetwork {
     private InputVector[] inputVectors;
     private int J;
@@ -12,36 +10,17 @@ public class NeuralNetwork {
     private double learningRate;
     private double momentum;
     private double trainingError;
+    private int epochCount = 0;
     private int maxEpoch;
     private double desiredTrainingAccuracy;
-    private EpochManager epochManager = new EpochManager();
-
-    private class EpochManager {
-        EpochManager() {
-            prev = new Epoch();
-            current = new Epoch();
-            next = new Epoch();
-        }
-
-        public int count = 0;
-        public Epoch prev = null;
-        public Epoch current = null;
-        public Epoch next = null;
-
-        public void nextEpoch() {
-            count++;
-            prev = current;
-            current = next;
-            next = new Epoch();
-        }
-    }
-
-    private class Epoch {
-        public double v[][];
-        public double w[][];
-        public double deltav[][];
-        public double deltaw[][];
-    }
+    private double v[][];
+    private double nextv[][];
+    private double w[][];
+    private double nextw[][];
+    private double deltav[][];
+    private double prevDeltav[][];
+    private double deltaw[][];
+    private double prevDeltaw[][];
 
     NeuralNetwork(int inputUnitCount, int hiddenUnitCount, int outputUniCount) {
         I = inputUnitCount + 1;
@@ -53,25 +32,24 @@ public class NeuralNetwork {
         o = new double[K];
         a = new int[K];
 
-        z[I - 2] = -1;
-        y[J - 2] = -1;
+        z[I - 1] = y[J - 1] = -1;
 
-        double v[][] = new double[J][I]; //hidden units x input units + bias unit
-        double w[][] = new double[K][J]; //hidden units x input units + bias unit
+        v = new double[J][I]; //hidden units x input units + bias unit
+        w = new double[K][J]; //hidden units x input units + bias unit
 
         for (int j = 0; j < J; j++) {
             for (int i = 0; i < I; i++)
-                v[j][i] = getRandomValue(-(1.0/I), (1.0/I));
+//                v[j][i] = 0.2;
+                v[j][i] = getRandomValue(-(1.0/Math.sqrt(I)), (1.0/Math.sqrt(I)));
         }
 
         for (int k = 0; k < K; k++) {
             for (int j = 0; j < J; j++)
-                w[k][j] = getRandomValue(-(1.0/J), (1.0/J));
+//                w[k][j] = 0.5;
+                w[k][j] = getRandomValue(-(1.0/Math.sqrt(J)), (1.0/Math.sqrt(J)));
         }
-        epochManager.current.v = v;
-        epochManager.current.w = w;
-        epochManager.prev.deltav = new double[J][I];
-        epochManager.prev.deltaw = new double[K][J];
+        prevDeltav = new double[J][I];
+        prevDeltaw = new double[K][J];
     }
 
     public void initControlVariables(double learningRate, double momentum, int maxEpoch, double desiredTrainingAccuracy) {
@@ -86,129 +64,160 @@ public class NeuralNetwork {
     }
 
     public double train() {
+        epochCount = 0;
+        printNetwork();
         boolean criteriaMet = false;
         double trainingAccuracy = 0;
         while (!criteriaMet) {
             trainingError = 0;
 
             for (InputVector inputVector : inputVectors) {
-                boolean missClassification = false;
-                System.arraycopy(inputVector.vector, 0, z, 0, I - 1);
-                for (int j = 0; j < J - 1; j++)
-                    y[j] = activation(NetYJ(j, z));
-
-                for (int k = 0; k < K; k++) {
-                    o[k] = activation(NetOK(k, y));
-                    if (o[k] >= 0.7)
-                        a[k] = 1;
-                    else if (o[k] <= 0.3)
-                        a[k] = 0;
-                }
+                boolean correctlyClassified = true;
+                calculateZ(inputVector);
+                calculateY();
+                calculateO();
+                correctlyClassified = !calculateA();
 
                 //training error
-                missClassification = !missClassification(a, inputVector.t);
-                if (missClassification)
+                correctlyClassified = correctlyClassified && !missClassification(inputVector.t);
+                if (correctlyClassified)
                     trainingError++;
 
                 //Calculate the error signal for each output
-                double errorO[] = getOutputErrorSignal(inputVector.t, o);
+                double errorO[] = calculateOutputErrorSignal(inputVector.t);
 
                 //Calculate the new weight values for the hidden-to-output weights
-                epochManager.current.deltaw = calculateDeltaW(errorO);
-                epochManager.next.w = calculateWNextEpoch();
+                deltaw = calculateDeltaW(errorO);
+                nextw = calculateW();
 
                 //calculate the error signal for each hidden unit
-                double errorY[] = getHiddenErrorSignal(errorO);
+                double errorY[] = calculateHiddenErrorSignal(errorO);
 
                 //Calculate the new weight values for the weights between hidden neuron j and input neuron i
-                epochManager.current.deltav = calculateDeltaV(errorY);
-                epochManager.next.v = calculateVNextEpoch();
+                deltav = calculateDeltaV(errorY);
+                nextv = calculateV();
 
                 trainingAccuracy = (trainingError / inputVectors.length) * 100;
+
+                prevDeltaw = deltaw;
+                prevDeltav = deltav;
+                w = nextw;
+                v = nextv;
+
+//                printV();
+//                printW();
+//                System.out.println("done");
             }
 
-            criteriaMet = (epochManager.count >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
-            epochManager.nextEpoch();
-            System.out.println("Epoch " + epochManager.count + " done. Accuracy: " + trainingAccuracy);
+            criteriaMet = (epochCount >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
+//            printNetwork();
+            epochCount++;
+            System.out.println("Epoch " + epochCount + " done. Accuracy: " + trainingAccuracy);
         }
         return trainingAccuracy;
     }
 
-    private double[][] calculateVNextEpoch() {
+    private void calculateZ(InputVector inputVector) {
+        System.arraycopy(inputVector.vector, 0, z, 0, I - 1);
+    }
+
+    private void calculateY() {
+        for (int j = 0; j < J - 1; j++)
+            y[j] = Fan(NetYJ(j));
+    }
+
+    private void calculateO() {
+        for (int k = 0; k < K; k++)
+            o[k] = Fan(NetOK(k));
+    }
+
+    private boolean calculateA() {
+        boolean classEr = false;
+        for (int k = 0; k < K; k++) {
+            if (o[k] >= 0.7)
+                a[k] = 1;
+            else if (o[k] <= 0.3)
+                a[k] = 0;
+            else
+                classEr = true;
+        }
+        return classEr;
+    }
+
+    private double[][] calculateV() {
         double[][] v = new double[J][I];
         for (int j = 0; j < J; j++) {
             for (int i = 0; i < I; i++)
-                v[j][i] = epochManager.current.v[j][i] * epochManager.current.deltav[j][i] + momentum * epochManager.prev.deltav[j][i];
+                v[j][i] = v[j][i] * deltav[j][i] + (momentum * prevDeltav[j][i]);
         }
         return v;
     }
 
     private double[][] calculateDeltaV(double errorY[]) {
-        double[][] weightValues = new double[J][I];
+        double[][] deltaV = new double[J][I];
         for (int j = 0; j < J; j++) {
             for (int i = 0; i < I; i++)
-                weightValues[j][i] = -learningRate * errorY[j] * z[i];
+                deltaV[j][i] = -learningRate * errorY[j] * z[i];
         }
-        return weightValues;
+        return deltaV;
     }
 
-    private double[] getHiddenErrorSignal(double errorO[]) {
-        double error[] = new double[J];
+    private double[] calculateHiddenErrorSignal(double errorO[]) {
+        double errorY[] = new double[J];
         for (int j = 0; j < J; j++) {
             for (int k = 0; k < K; k++)
-                error[j] = errorO[k] * epochManager.current.w[k][j] * (1 - y[j]) * y[j];
+                errorY[j] = errorO[k] * w[k][j] * (1 - y[j]) * y[j];
         }
-        return error;
+        return errorY;
     }
 
-    private double[][] calculateWNextEpoch() {
+    private double[][] calculateW() {
         double[][] w = new double[K][J];
         for (int k = 0; k < K; k++) {
             for (int j = 0; j < J; j++)
-                w[k][j] = epochManager.current.w[k][j] + epochManager.current.deltaw[k][j] + momentum * epochManager.prev.deltaw[k][j];
+                w[k][j] = w[k][j] + deltaw[k][j] + momentum * prevDeltaw[k][j];
         }
         return w;
     }
 
     private double[][] calculateDeltaW(double errorO[]) {
-        double[][] weightValues = new double[K][J];
+        double[][] deltaW = new double[K][J];
         for (int k = 0; k < K; k++) {
             for (int j = 0; j < J; j++)
-                weightValues[k][j] = -learningRate * errorO[k] * y[j];
+                deltaW[k][j] = -learningRate * errorO[k] * y[j];
         }
-        return weightValues;
+        return deltaW;
     }
 
-    private double[] getOutputErrorSignal(int target[], double output[]) {
-        double errorSignal[] = new double[target.length];
-        for (int a = 0; a < target.length; a++) {
-            errorSignal[a] = -(target[a] - output[a]) * (1 - output[a]) * output[a];
-        }
-        return errorSignal;
+    private double[] calculateOutputErrorSignal(int t[]) {
+        double errorO[] = new double[K];
+        for (int k = 0; k < K; k++)
+            errorO[k] = -(t[k] - o[k]) * (1 - o[k]) * o[k];
+        return errorO;
     }
 
-    private boolean missClassification(int output[], int target[]) {
-        for (int a = 0; a < output.length; a++)
-            if (output[a] != target[a])
+    private boolean missClassification(int t[]) {
+        for (int a = 0; a < K; a++)
+            if (o[a] != t[a])
                 return true;
         return false;
     }
 
-    private double NetYJ(int j, double inputs[]) {
+    private double NetYJ(int j) {
         double net = 0;
-        for (int x = 0; x < I; x++)
-            net += (epochManager.current.v[j][x] * inputs[x]);
+        for (int i = 0; i < I; i++)
+            net += (v[j][i] * z[i]);
         return net;
     }
 
-    private double NetOK(int k, double inputs[]) {
+    private double NetOK(int k) {
         double net = 0;
-        for (int x = 0; x < J; x++)
-            net += (epochManager.current.w[k][x] * inputs[x]);
+        for (int j = 0; j < J; j++)
+            net += (w[k][j] * y[j]);
         return net;
     }
 
-    private double activation(double net) {
+    private double Fan(double net) {
         return 1/(1 + Math.pow(Math.E, -1*(net)));
     }
 
@@ -217,4 +226,59 @@ public class NeuralNetwork {
         return value + low;
     }
 
+    private void printNetwork() {
+        System.out.println("Network");
+        System.out.println("Z:");
+        printZ();
+
+        System.out.println("Y:");
+        printY();
+
+        System.out.println("O:");
+        printO();
+
+        System.out.println("V:");
+        printV();
+
+        System.out.println("W:");
+        printW();
+    }
+
+    private void printW() {
+        for (int k = 0; k < K; k++) {
+            for (int j = 0; j < J; j++) {
+                System.out.print(w[k][j] + "|");
+                System.out.print(prevDeltaw[k][j] + " ");
+            }
+            System.out.println("");
+        }
+    }
+
+    private void printV() {
+        for (int j = 0; j < J; j++) {
+            for (int i = 0; i < I; i++) {
+                System.out.print(v[j][i] + "|");
+                System.out.print(prevDeltav[j][i] + " ");
+            }
+            System.out.println("");
+        }
+    }
+
+    private void printZ() {
+        for (int i = 0; i < I; i++)
+            System.out.print(z[i] + " ");
+        System.out.println("");
+    }
+
+    private void printY() {
+        for (int j = 0; j < J; j++)
+            System.out.print(y[j] + " ");
+        System.out.println("");
+    }
+
+    private void printO() {
+        for (int k = 0; k < K; k++)
+            System.out.print(o[k] + " ");
+        System.out.println("");
+    }
 }
