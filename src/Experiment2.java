@@ -1,9 +1,9 @@
 public class Experiment2 extends Experiment {
     public Experiment2(InputVector[] inputVectors) {
         super(inputVectors);
-        neuralNetwork = new NeuralNetwork(16, 10, 1);
-        neuralNetwork.initControlVariables(0.2, 0.05, 10000, 98);
-        neuralNetwork.setInputVectors(inputVectors);
+        neuralNetwork = new NeuralNetwork(16, 60, 1);
+        neuralNetwork.initControlVariables(0.5, 0.1, 10000, 99);
+        neuralNetwork.setDataSets(Dt, Dg, Dv);
     }
 
     public double start() {
@@ -12,7 +12,7 @@ public class Experiment2 extends Experiment {
 
     public void generateTargetSets() {
         for (InputVector inputVector : inputVectors) {
-            inputVector.t = new int[] {("AEIOU".contains(String.valueOf(inputVector.classChar))? 1 : 0)};
+            inputVector.t = new int[] {("AEIOU".contains(String.valueOf(inputVector.classChar))? 0 : 1)};
         }
     }
 }

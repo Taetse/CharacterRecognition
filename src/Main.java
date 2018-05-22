@@ -10,8 +10,8 @@ public class Main {
 //        InputVector[] inputVectors = getInputVectors("test.data");
         normalizeVectors(inputVectors);
 
-        Experiment neuralNetwork = new Experiment3(inputVectors);
-//        Experiment neuralNetwork = new Experiment2(inputVectors);
+//        Experiment neuralNetwork = new Experiment3(inputVectors);
+        Experiment neuralNetwork = new Experiment2(inputVectors);
         System.out.println("Accuracy: ");
         System.out.println((neuralNetwork).start());
     }

@@ -1,5 +1,10 @@
+import java.util.Arrays;
+import java.util.Collections;
+
 public class NeuralNetwork {
-    private InputVector[] inputVectors;
+    private InputVector[] Dt;
+    private InputVector[] Dg;
+    private InputVector[] Dv;
     private int J;
     private int K;
     private int I;
@@ -56,8 +61,10 @@ public class NeuralNetwork {
         this.desiredTrainingAccuracy = desiredTrainingAccuracy;
     }
 
-    public void setInputVectors(InputVector[] inputVectors) {
-        this.inputVectors = inputVectors;
+    public void setDataSets(InputVector[] dt, InputVector[] dg, InputVector[] dv) {
+        Dt = dt;
+        Dg = dg;
+        Dv = dv;
     }
 
     public double train() {
@@ -67,8 +74,9 @@ public class NeuralNetwork {
         double trainingAccuracy = 0;
         while (!criteriaMet) {
             trainingError = 0;
+            randomizeSet(Dt);
 
-            for (InputVector inputVector : inputVectors) {
+            for (InputVector inputVector : Dt) {
                 calculateZ(inputVector);
                 calculateY();
                 calculateO();
@@ -92,7 +100,7 @@ public class NeuralNetwork {
                 prevDeltav = deltav;
                 deltav = temp;
             }
-            trainingAccuracy = (trainingError / inputVectors.length) * 100;
+            trainingAccuracy = (trainingError / Dt.length) * 100;
 
             criteriaMet = (epochCount >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
             epochCount++;
@@ -131,7 +139,7 @@ public class NeuralNetwork {
     private void calculateV() {
         for (int j = 0; j < J; j++)
             for (int i = 0; i < I; i++)
-                v[j][i] += + deltav[j][i] + (momentum * prevDeltav[j][i]);
+                v[j][i] += deltav[j][i] + (momentum * prevDeltav[j][i]);
     }
 
     private void calculateDeltaV(double errorY[]) {
@@ -151,7 +159,7 @@ public class NeuralNetwork {
     private void calculateW() {
         for (int k = 0; k < K; k++)
             for (int j = 0; j < J; j++)
-                w[k][j] += deltaw[k][j] + momentum * prevDeltaw[k][j];
+                w[k][j] += deltaw[k][j] + (momentum * prevDeltaw[k][j]);
     }
 
     private void calculateDeltaW(double errorO[]) {
@@ -251,5 +259,9 @@ public class NeuralNetwork {
         for (int k = 0; k < K; k++)
             System.out.print(o[k] + " ");
         System.out.println("");
+    }
+
+    protected void randomizeSet(InputVector[] set) {
+        Collections.shuffle(Arrays.asList(set));
     }
 }
