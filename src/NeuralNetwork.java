@@ -52,11 +52,12 @@ public class NeuralNetwork {
         correctlyClassified = 0;
         int counter = 0;
         for (InputVector pattern : validationSet) {
-            if (feedForward(pattern))
+            boolean isCC = feedForward(pattern.vector, pattern.t);
+            if (isCC)
                 correctlyClassified++;
-            System.out.println("Pattern #" + ++counter + " : char:" + pattern.classChar);
+            System.out.println("Pattern #" + ++counter + ": char:" + pattern.classChar + ", correctly classified:" + isCC);
             for (int k = 0; k < K; k++)
-                System.out.println(k + ") o:" + o[k] + ", a:" + a[k] + ", t:" + pattern.t[k]);
+                System.out.println(k + ") o:" + String.format("%.3f", o[k]) + ", a:" + a[k] + ", t:" + pattern.t[k]);
         }
         return  (correctlyClassified / validationSet.length) * 100;
     }
@@ -70,7 +71,7 @@ public class NeuralNetwork {
             randomizeSet(trainingSet);
 
             for (InputVector pattern : trainingSet) {
-                if (feedForward(pattern))
+                if (feedForward(pattern.vector, pattern.t))
                     correctlyClassified++;
                 backPropagate(pattern);
             }
@@ -78,29 +79,30 @@ public class NeuralNetwork {
             epochCount++;
 
             criteriaMet = (epochCount >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
-            System.out.println("Epoch " + epochCount + " done. Accuracy: " + trainingAccuracy);
+            System.out.println("Epoch " + epochCount + ". Accuracy: " + String.format("%.3f", trainingAccuracy));
         }
         return trainingAccuracy;
     }
 
-    private boolean feedForward(InputVector pattern) {
-        calculateZ(pattern);
-        calculateY();
-        calculateO();
-        boolean correctlyClassified = !calculateA();
-        return correctlyClassified && !missClassification(pattern.t);
+    private boolean feedForward(double in[], int t[]) {
+        calculateZ(in); //calculate input layer outputs
+        calculateY(); //calculate hidden layer outputs
+        calculateO(); //calculate output layer outputs
+        calculateA(); //calculate actual values
+        return !missClassification(t);
     }
 
     private void backPropagate(InputVector pattern) {
-        calculateErrorO(pattern.t);
-        calculateErrorY();
+        calculateErrorO(pattern.t); //calculate output error
+        calculateErrorY(); //calculate hidden error
 
-        calculateDeltaW();
-        calculateDeltaV();
+        calculateDeltaW(); //hidden - output weight update steps
+        calculateDeltaV(); //input - hidden weights update steps
 
-        calculateW();
-        calculateV();
+        calculateW(); //update hidden - output weights
+        calculateV(); //update input - hidden weights
 
+        //swap of deltas (only for efficiency reasons)
         double temp[][] = prevDeltaw;
         prevDeltaw = deltaw;
         deltaw = temp;
@@ -109,8 +111,8 @@ public class NeuralNetwork {
         deltav = temp;
     }
 
-    private void calculateZ(InputVector inputVector) {
-        System.arraycopy(inputVector.vector, 0, z, 0, I - 1);
+    private void calculateZ(double in[]) {
+        System.arraycopy(in, 0, z, 0, I - 1);
     }
 
     private void calculateY() {
@@ -123,17 +125,15 @@ public class NeuralNetwork {
             o[k] = Fan(NetOK(k));
     }
 
-    private boolean calculateA() {
-        boolean classEr = false;
+    private void calculateA() {
         for (int k = 0; k < K; k++) {
             if (o[k] >= 0.7)
                 a[k] = 1;
             else if (o[k] <= 0.3)
                 a[k] = 0;
             else
-                classEr = true;
+                a[k] = -1;
         }
-        return classEr;
     }
 
     private void calculateV() {

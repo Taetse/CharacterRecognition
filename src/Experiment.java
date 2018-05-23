@@ -7,10 +7,11 @@ public abstract class Experiment {
     protected InputVector[] Dg;
     protected InputVector[] Dv;
     protected NeuralNetwork neuralNetwork;
-    public Experiment(InputVector[] inputVectors) {
+
+    protected Experiment(InputVector[] inputVectors, String targetPattern) {
         this.inputVectors = inputVectors;
         randomizeSet(inputVectors);
-        generateTargetSets();
+        generateTargetSets(targetPattern);
         splitTrainingSet();
     }
 
@@ -43,5 +44,5 @@ public abstract class Experiment {
         System.out.println("Validation set accuracy: " + accuracy);
         return accuracy;
     }
-    abstract void generateTargetSets();
+    abstract void generateTargetSets(String pattern);
 }

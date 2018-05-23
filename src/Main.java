@@ -3,6 +3,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String strings[]) {
@@ -10,7 +11,12 @@ public class Main {
 //        InputVector[] inputVectors = getInputVectors("test.data");
         normalizeVectors(inputVectors);
 
-        Experiment neuralNetwork = new Experiment3(inputVectors);
+//        Experiment neuralNetwork = new Experiment3(inputVectors);
+
+        System.out.print("Enter a character to distinguish: ");
+        Scanner s = new Scanner(System.in);
+        String str = s.nextLine();
+        Experiment neuralNetwork = new Experiment1(inputVectors, str);
 //        Experiment neuralNetwork = new Experiment2(inputVectors);
         System.out.println("Accuracy: ");
         (neuralNetwork).train();
