@@ -1,5 +1,4 @@
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 public abstract class Experiment {
@@ -10,6 +9,7 @@ public abstract class Experiment {
     protected NeuralNetwork neuralNetwork;
     public Experiment(InputVector[] inputVectors) {
         this.inputVectors = inputVectors;
+        randomizeSet(inputVectors);
         generateTargetSets();
         splitTrainingSet();
     }
@@ -31,6 +31,17 @@ public abstract class Experiment {
         Collections.shuffle(Arrays.asList(set));
     }
 
-    abstract double start();
+    public double train() {
+        System.out.println("Training set accuracy: " + neuralNetwork.train(Dt));
+        double accuracy =  neuralNetwork.train(Dg);
+        System.out.println("Generalization set accuracy: " + accuracy);
+        return accuracy;
+    }
+
+    public double validate() {
+        double accuracy = neuralNetwork.validate(Dv);
+        System.out.println("Validation set accuracy: " + accuracy);
+        return accuracy;
+    }
     abstract void generateTargetSets();
 }

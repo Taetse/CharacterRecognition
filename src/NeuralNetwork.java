@@ -2,32 +2,16 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class NeuralNetwork {
-    private InputVector[] Dt;
-    private InputVector[] Dg;
-    private InputVector[] Dv;
-    private int J;
-    private int K;
-    private int I;
-    private double z[];
-    private double y[];
-    private double o[];
+    private int J, K, I;
+    private double[] z, y, o, errorO, errorY;
     private int a[];
-    private double learningRate;
-    private double momentum;
-    private double trainingError;
-    private int epochCount = 0;
+    private double learningRate, momentum, correctlyClassified, desiredTrainingAccuracy;
     private int maxEpoch;
-    private double desiredTrainingAccuracy;
-    private double v[][];
-    private double w[][];
-    private double deltav[][];
-    private double prevDeltav[][];
-    private double deltaw[][];
-    private double prevDeltaw[][];
+    private double[][] v, w, deltav, prevDeltav, deltaw, prevDeltaw;
 
     NeuralNetwork(int inputUnitCount, int hiddenUnitCount, int outputUnitCount) {
-        I = inputUnitCount + 1;
-        J = hiddenUnitCount + 1;
+        I = inputUnitCount + 1; //+1 for bias
+        J = hiddenUnitCount + 1; //+1 for bias
         K = outputUnitCount;
 
         z = new double[I];
@@ -35,10 +19,13 @@ public class NeuralNetwork {
         o = new double[K];
         a = new int[K];
 
-        z[I - 1] = y[J - 1] = -1;
+        z[I - 1] = y[J - 1] = -1; //bias inputs
 
-        v = new double[J][I]; //hidden units x input units + bias unit
-        w = new double[K][J]; //hidden units x input units + bias unit
+        v = new double[J][I];
+        w = new double[K][J];
+
+        errorO = new double[K];
+        errorY = new double[J];
 
         prevDeltav = new double[J][I];
         deltav = new double[J][I];
@@ -61,52 +48,65 @@ public class NeuralNetwork {
         this.desiredTrainingAccuracy = desiredTrainingAccuracy;
     }
 
-    public void setDataSets(InputVector[] dt, InputVector[] dg, InputVector[] dv) {
-        Dt = dt;
-        Dg = dg;
-        Dv = dv;
+    public double validate(InputVector[] validationSet) {
+        correctlyClassified = 0;
+        int counter = 0;
+        for (InputVector pattern : validationSet) {
+            if (feedForward(pattern))
+                correctlyClassified++;
+            System.out.println("Pattern #" + ++counter + " : char:" + pattern.classChar);
+            for (int k = 0; k < K; k++)
+                System.out.println(k + ") o:" + o[k] + ", a:" + a[k] + ", t:" + pattern.t[k]);
+        }
+        return  (correctlyClassified / validationSet.length) * 100;
     }
 
-    public double train() {
-        epochCount = 0;
-        printNetwork();
+    public double train(InputVector[] trainingSet) {
+        int epochCount = 0;
         boolean criteriaMet = false;
         double trainingAccuracy = 0;
         while (!criteriaMet) {
-            trainingError = 0;
-            randomizeSet(Dt);
+            correctlyClassified = 0;
+            randomizeSet(trainingSet);
 
-            for (InputVector inputVector : Dt) {
-                calculateZ(inputVector);
-                calculateY();
-                calculateO();
-                boolean correctlyClassified = !calculateA();
-                if (correctlyClassified && !missClassification(inputVector.t))
-                    trainingError++;
-
-                double errorO[] = calculateErrorO(inputVector.t);
-                double errorY[] = calculateErrorY(errorO);
-
-                calculateDeltaW(errorO);
-                calculateDeltaV(errorY);
-
-                calculateW();
-                calculateV();
-
-                double temp[][] = prevDeltaw;
-                prevDeltaw = deltaw;
-                deltaw = temp;
-                temp = prevDeltav;
-                prevDeltav = deltav;
-                deltav = temp;
+            for (InputVector pattern : trainingSet) {
+                if (feedForward(pattern))
+                    correctlyClassified++;
+                backPropagate(pattern);
             }
-            trainingAccuracy = (trainingError / Dt.length) * 100;
+            trainingAccuracy = (correctlyClassified / trainingSet.length) * 100;
+            epochCount++;
 
             criteriaMet = (epochCount >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
-            epochCount++;
             System.out.println("Epoch " + epochCount + " done. Accuracy: " + trainingAccuracy);
         }
         return trainingAccuracy;
+    }
+
+    private boolean feedForward(InputVector pattern) {
+        calculateZ(pattern);
+        calculateY();
+        calculateO();
+        boolean correctlyClassified = !calculateA();
+        return correctlyClassified && !missClassification(pattern.t);
+    }
+
+    private void backPropagate(InputVector pattern) {
+        calculateErrorO(pattern.t);
+        calculateErrorY();
+
+        calculateDeltaW();
+        calculateDeltaV();
+
+        calculateW();
+        calculateV();
+
+        double temp[][] = prevDeltaw;
+        prevDeltaw = deltaw;
+        deltaw = temp;
+        temp = prevDeltav;
+        prevDeltav = deltav;
+        deltav = temp;
     }
 
     private void calculateZ(InputVector inputVector) {
@@ -142,18 +142,18 @@ public class NeuralNetwork {
                 v[j][i] += deltav[j][i] + (momentum * prevDeltav[j][i]);
     }
 
-    private void calculateDeltaV(double errorY[]) {
+    private void calculateDeltaV() {
         for (int j = 0; j < J; j++)
             for (int i = 0; i < I; i++)
                 deltav[j][i] = -learningRate * errorY[j] * z[i];
     }
 
-    private double[] calculateErrorY(double errorO[]) {
-        double errorY[] = new double[J];
-        for (int j = 0; j < J; j++)
+    private void calculateErrorY() {
+        for (int j = 0; j < J; j++) {
+            errorY[j] = 0;
             for (int k = 0; k < K; k++)
                 errorY[j] += errorO[k] * w[k][j] * (1 - y[j]) * y[j];
-        return errorY;
+        }
     }
 
     private void calculateW() {
@@ -162,17 +162,15 @@ public class NeuralNetwork {
                 w[k][j] += deltaw[k][j] + (momentum * prevDeltaw[k][j]);
     }
 
-    private void calculateDeltaW(double errorO[]) {
+    private void calculateDeltaW() {
         for (int k = 0; k < K; k++)
             for (int j = 0; j < J; j++)
                 deltaw[k][j] = -learningRate * errorO[k] * y[j];
     }
 
-    private double[] calculateErrorO(int t[]) {
-        double errorO[] = new double[K];
+    private void calculateErrorO(int t[]) {
         for (int k = 0; k < K; k++)
             errorO[k] = -(t[k] - o[k]) * (1 - o[k]) * o[k];
-        return errorO;
     }
 
     private boolean missClassification(int t[]) {
@@ -197,68 +195,11 @@ public class NeuralNetwork {
     }
 
     private double Fan(double net) {
-        return 1/(1 + Math.pow(Math.E, -1*(net)));
+        return 1/(1 + Math.pow(Math.E, -1 * (net)));
     }
 
     private double getRandomValue(double low, double top) {
-        double value = Math.random() * (top - low);
-        return value + low;
-    }
-
-    private void printNetwork() {
-        System.out.println("Network");
-        System.out.println("Z:");
-        printZ();
-
-        System.out.println("Y:");
-        printY();
-
-        System.out.println("O:");
-        printO();
-
-        System.out.println("V:");
-        printV();
-
-        System.out.println("W:");
-        printW();
-    }
-
-    private void printW() {
-        for (int k = 0; k < K; k++) {
-            for (int j = 0; j < J; j++) {
-                System.out.print(w[k][j] + "|");
-                System.out.print(prevDeltaw[k][j] + " ");
-            }
-            System.out.println("");
-        }
-    }
-
-    private void printV() {
-        for (int j = 0; j < J; j++) {
-            for (int i = 0; i < I; i++) {
-                System.out.print(v[j][i] + "|");
-                System.out.print(prevDeltav[j][i] + " ");
-            }
-            System.out.println("");
-        }
-    }
-
-    private void printZ() {
-        for (int i = 0; i < I; i++)
-            System.out.print(z[i] + " ");
-        System.out.println("");
-    }
-
-    private void printY() {
-        for (int j = 0; j < J; j++)
-            System.out.print(y[j] + " ");
-        System.out.println("");
-    }
-
-    private void printO() {
-        for (int k = 0; k < K; k++)
-            System.out.print(o[k] + " ");
-        System.out.println("");
+        return (Math.random() * (top - low)) + low;
     }
 
     protected void randomizeSet(InputVector[] set) {

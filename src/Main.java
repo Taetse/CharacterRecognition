@@ -10,10 +10,11 @@ public class Main {
 //        InputVector[] inputVectors = getInputVectors("test.data");
         normalizeVectors(inputVectors);
 
-//        Experiment neuralNetwork = new Experiment3(inputVectors);
-        Experiment neuralNetwork = new Experiment2(inputVectors);
+        Experiment neuralNetwork = new Experiment3(inputVectors);
+//        Experiment neuralNetwork = new Experiment2(inputVectors);
         System.out.println("Accuracy: ");
-        System.out.println((neuralNetwork).start());
+        (neuralNetwork).train();
+        (neuralNetwork).validate();
     }
 
     private static void normalizeVectors(InputVector[] vectors) {
@@ -59,8 +60,10 @@ public class Main {
             FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line;
-            while ((line = bufferedReader.readLine()) != null)
-                lines.add(line);
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.length() != 0)
+                    lines.add(line);
+            }
             fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();

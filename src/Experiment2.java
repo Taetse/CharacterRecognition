@@ -1,13 +1,8 @@
 public class Experiment2 extends Experiment {
     public Experiment2(InputVector[] inputVectors) {
         super(inputVectors);
-        neuralNetwork = new NeuralNetwork(16, 60, 1);
-        neuralNetwork.initControlVariables(0.5, 0.1, 10000, 99);
-        neuralNetwork.setDataSets(Dt, Dg, Dv);
-    }
-
-    public double start() {
-        return neuralNetwork.train();
+        neuralNetwork = new NeuralNetwork(16, 30, 1);
+        neuralNetwork.initControlVariables(0.2, 0.1, 5000, 90);
     }
 
     public void generateTargetSets() {
