@@ -1,0 +1,140 @@
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:1
+Dt. E:0.017, Accuracy:0.875
+Dg. E:0.017, Accuracy:0.475
+NeuralNetwork setup. LearningRate:0.1, Momentum:0.2, HiddenNeurons:100
+Dt. E:0.002, Accuracy:85.292
+Dg. E:0.002, Accuracy:89.000
+NeuralNetwork setup. LearningRate:0.8, Momentum:0.2, HiddenNeurons:100
+Dt. E:0.002, Accuracy:89.642
+Dg. E:0.002, Accuracy:91.900
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:100
+Dt. E:0.002, Accuracy:88.850
+Dg. E:0.002, Accuracy:90.525
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.0, HiddenNeurons:100, OutputNeurons:26
+Dt. E:0.001, Accuracy:92.933
+Dg. E:0.001, Accuracy:95.100
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:100, OutputNeurons:26
+Dt. E:0.002, Accuracy:90.467
+Dg. E:0.001, Accuracy:92.300
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.5, HiddenNeurons:100, OutputNeurons:26
+Dt. E:0.002, Accuracy:90.600
+Dg. E:0.002, Accuracy:91.875
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.8, HiddenNeurons:100, OutputNeurons:26
+Dt. E:0.002, Accuracy:90.283
+Dg. E:0.001, Accuracy:93.400
+NeuralNetwork setup. LearningRate:0.5, Momentum:1.0, HiddenNeurons:100, OutputNeurons:26
+Dt. E:0.002, Accuracy:89.650
+Dg. E:0.001, Accuracy:92.375
+NeuralNetwork setup. LearningRate:0.5, Momentum:1.0, HiddenNeurons:50, OutputNeurons:1
+Dt. E:0.006, Accuracy:98.367
+Dg. E:0.004, Accuracy:99.150
+Dv. Accuracy:95.926
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.8, HiddenNeurons:50, OutputNeurons:1
+Dt. E:0.007, Accuracy:97.892
+Dg. E:0.005, Accuracy:99.025
+Dv. Accuracy:95.776
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.5, HiddenNeurons:50, OutputNeurons:1
+Dt. E:0.010, Accuracy:97.642
+Dg. E:0.006, Accuracy:98.750
+Dv. Accuracy:95.851
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:50, OutputNeurons:1
+Dt. E:0.010, Accuracy:97.500
+Dg. E:0.008, Accuracy:98.450
+Dv. Accuracy:95.901
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.0, HiddenNeurons:50, OutputNeurons:1
+Dt. E:0.008, Accuracy:97.992
+Dg. E:0.009, Accuracy:98.275
+Dv. Accuracy:96.301
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:50, OutputNeurons:1
+Dt. E:0.008, Accuracy:97.567
+Dg. E:0.008, Accuracy:98.475
+Dv. Accuracy:95.776
+NeuralNetwork setup. LearningRate:0.8, Momentum:0.2, HiddenNeurons:50, OutputNeurons:1
+Dt. E:0.008, Accuracy:97.983
+Dg. E:0.006, Accuracy:98.650
+Dv. Accuracy:96.076
+NeuralNetwork setup. LearningRate:1.0, Momentum:0.2, HiddenNeurons:50, OutputNeurons:1
+Dt. E:0.008, Accuracy:97.883
+Dg. E:0.005, Accuracy:98.975
+Dv. Accuracy:96.451
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:100, OutputNeurons:1
+Dt. E:0.008, Accuracy:97.733
+Dg. E:0.005, Accuracy:99.075
+Dv. Accuracy:95.601
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:70, OutputNeurons:1
+Dt. E:0.009, Accuracy:97.925
+Dg. E:0.007, Accuracy:98.700
+Dv. Accuracy:95.901
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.011, Accuracy:96.967
+Dg. E:0.006, Accuracy:98.875
+Dv. Accuracy:95.401
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:10, OutputNeurons:1
+Dt. E:0.020, Accuracy:94.850
+Dg. E:0.015, Accuracy:96.400
+Dv. Accuracy:94.201
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:1, OutputNeurons:1
+Dt. E:0.065, Accuracy:64.550
+Dg. E:0.066, Accuracy:63.750
+Dv. Accuracy:65.784
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.5, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.001, Accuracy:99.767
+Dg. E:0.001, Accuracy:99.900
+Dv. Accuracy:99.750
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.8, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.001, Accuracy:99.758
+Dg. E:0.001, Accuracy:99.875
+Dv. Accuracy:99.825
+NeuralNetwork setup. LearningRate:0.2, Momentum:1.0, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.002, Accuracy:99.600
+Dg. E:0.003, Accuracy:99.450
+Dv. Accuracy:99.550
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.001, Accuracy:99.850
+Dg. E:0.002, Accuracy:99.650
+Dv. Accuracy:99.825
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.0, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.003, Accuracy:99.500
+Dg. E:0.002, Accuracy:99.650
+Dv. Accuracy:99.650
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.002, Accuracy:99.600
+Dg. E:0.001, Accuracy:99.700
+Dv. Accuracy:99.325
+NeuralNetwork setup. LearningRate:0.7, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.001, Accuracy:99.817
+Dg. E:0.001, Accuracy:99.875
+Dv. Accuracy:99.575
+NeuralNetwork setup. LearningRate:1.0, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.002, Accuracy:99.583
+Dg. E:0.002, Accuracy:99.575
+Dv. Accuracy:99.475
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:1, OutputNeurons:1
+Dt. E:0.003, Accuracy:99.200
+Dg. E:0.003, Accuracy:99.375
+Dv. Accuracy:99.100
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:10, OutputNeurons:1
+Dt. E:0.001, Accuracy:99.817
+Dg. E:0.002, Accuracy:99.675
+Dv. Accuracy:99.875
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:40, OutputNeurons:1
+Dt. E:0.002, Accuracy:99.558
+Dg. E:0.002, Accuracy:99.575
+Dv. Accuracy:99.600
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:80, OutputNeurons:1
+Dt. E:0.002, Accuracy:99.617
+Dg. E:0.002, Accuracy:99.600
+Dv. Accuracy:99.375
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:100, OutputNeurons:1
+Dt. E:0.002, Accuracy:99.625
+Dg. E:0.002, Accuracy:99.575
+Dv. Accuracy:99.350
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:100, OutputNeurons:26
+Dt. E:0.002, Accuracy:90.275
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:50, OutputNeurons:1
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:100, OutputNeurons:26
+NeuralNetwork setup. LearningRate:0.5, Momentum:0.2, HiddenNeurons:50, OutputNeurons:1
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:30, OutputNeurons:26
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1

@@ -33,8 +33,8 @@ public abstract class Experiment {
     }
 
     public double train() {
-        System.out.println("Training set accuracy: " + neuralNetwork.train(Dt));
-        double accuracy =  neuralNetwork.train(Dg);
+        System.out.println("Training set accuracy: " + neuralNetwork.train(Dt, "Dt"));
+        double accuracy =  neuralNetwork.train(Dg, "Dg");
         System.out.println("Generalization set accuracy: " + accuracy);
         return accuracy;
     }

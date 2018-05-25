@@ -3,27 +3,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
-public class Main {
-    public static void main(String strings[]) {
-        InputVector[] inputVectors = getInputVectors("letter-recognition.data");
-//        InputVector[] inputVectors = getInputVectors("test.data");
-        normalizeVectors(inputVectors);
-
-//        Experiment neuralNetwork = new Experiment3(inputVectors);
-
-        System.out.print("Enter a character to distinguish: ");
-        Scanner s = new Scanner(System.in);
-        String str = s.nextLine();
-        Experiment neuralNetwork = new Experiment1(inputVectors, str);
-//        Experiment neuralNetwork = new Experiment2(inputVectors);
-        System.out.println("Accuracy: ");
-        (neuralNetwork).train();
-        (neuralNetwork).validate();
-    }
-
-    private static void normalizeVectors(InputVector[] vectors) {
+public class Utils {
+    public static void normalizeVectors(InputVector[] vectors) {
         for (int a = 0; a < vectors[0].vector.length; a++) {
             double biggest = Double.NEGATIVE_INFINITY;
             for (int b = 0; b < vectors.length; b++) {
@@ -40,7 +22,7 @@ public class Main {
         }
     }
 
-    private static InputVector[] getInputVectors(String fileName) {
+    public static InputVector[] getInputVectors(String fileName) {
         ArrayList<String> fileLines = getFileLines(fileName);
         InputVector[] inputVectors = new InputVector[fileLines.size()];
         int index = 0;
@@ -59,7 +41,7 @@ public class Main {
         return inputVectors;
     }
 
-    private static ArrayList<String> getFileLines(String fileName) {
+    public static ArrayList<String> getFileLines(String fileName) {
         ArrayList<String> lines = new ArrayList<>();
         try {
             File file = new File(fileName);

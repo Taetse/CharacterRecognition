@@ -1,0 +1,4 @@
+NeuralNetwork setup. LearningRate:0.2, Momentum:0.2, HiddenNeurons:30, OutputNeurons:1
+Dt. E:0.002, Accuracy:99.567
+Dg. E:0.003, Accuracy:99.475
+Dv. Accuracy:99.575

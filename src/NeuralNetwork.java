@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -46,6 +47,7 @@ public class NeuralNetwork {
         this.momentum = momentum;
         this.maxEpoch = maxEpoch;
         this.desiredTrainingAccuracy = desiredTrainingAccuracy;
+        writeOutputLine("NeuralNetwork setup. LearningRate:" + learningRate + ", Momentum:" + momentum + ", HiddenNeurons:" + (J - 1) + ", OutputNeurons:" + K);
     }
 
     public double validate(InputVector[] validationSet) {
@@ -55,32 +57,40 @@ public class NeuralNetwork {
             boolean isCC = feedForward(pattern.vector, pattern.t);
             if (isCC)
                 correctlyClassified++;
-            System.out.println("Pattern #" + ++counter + ": char:" + pattern.classChar + ", correctly classified:" + isCC);
+            System.out.println("Pattern #" + ++counter + ": Char:" + pattern.classChar + ", Correct:" + isCC);
             for (int k = 0; k < K; k++)
-                System.out.println(k + ") o:" + String.format("%.3f", o[k]) + ", a:" + a[k] + ", t:" + pattern.t[k]);
+                System.out.println(" o[" + k + "] Output:" + String.format("%.3f", o[k]) + ", Actual:" + a[k] + ", Target:" + pattern.t[k]);
         }
+        writeOutputLine("Dv. Accuracy:" + String.format("%.3f", (correctlyClassified / validationSet.length) * 100));
         return  (correctlyClassified / validationSet.length) * 100;
     }
 
-    public double train(InputVector[] trainingSet) {
+    public double train(InputVector[] Dt, String setDescription) {
         int epochCount = 0;
         boolean criteriaMet = false;
-        double trainingAccuracy = 0;
+        double trainingAccuracy = 0, E = 0;
+        System.out.println("#, Accuracy");
         while (!criteriaMet) {
-            correctlyClassified = 0;
-            randomizeSet(trainingSet);
+            E = correctlyClassified = 0;
+            randomizeSet(Dt);
 
-            for (InputVector pattern : trainingSet) {
+            for (InputVector pattern : Dt) {
                 if (feedForward(pattern.vector, pattern.t))
                     correctlyClassified++;
                 backPropagate(pattern);
+                E += calculateE(pattern.t);
             }
-            trainingAccuracy = (correctlyClassified / trainingSet.length) * 100;
+            E /= (Dt.length * K * 2);
+            trainingAccuracy = (correctlyClassified / Dt.length) * 100;
             epochCount++;
 
             criteriaMet = (epochCount >= maxEpoch || desiredTrainingAccuracy < trainingAccuracy);
-            System.out.println("Epoch " + epochCount + ". Accuracy: " + String.format("%.3f", trainingAccuracy));
+//            System.out.println("Epoch " + epochCount + ". Accuracy: " + String.format("%.3f", trainingAccuracy));
+//            System.out.println(setDescription + " Epoch:" + epochCount + ". E:" + String.format("%.3f", E) + ", Accuracy:" + String.format("%.3f", trainingAccuracy));
+            System.out.println(epochCount + ", " + String.format("%.3f", trainingAccuracy));
         }
+        writeOutputLine(setDescription + ". Accuracy:" + String.format("%.3f", trainingAccuracy));
+//        writeOutputLine(setDescription + ". E:" + String.format("%.3f", E) + ", Accuracy:" + String.format("%.3f", trainingAccuracy));
         return trainingAccuracy;
     }
 
@@ -180,6 +190,13 @@ public class NeuralNetwork {
         return false;
     }
 
+    private double calculateE(int t[]) {
+        double e = 0;
+        for (int k = 0; k < K; k++)
+            e += Math.pow((t[k] - o[k]), 2);
+        return e;
+    }
+
     private double NetYJ(int j) {
         double net = 0;
         for (int i = 0; i < I; i++)
@@ -192,6 +209,21 @@ public class NeuralNetwork {
         for (int j = 0; j < J; j++)
             net += (w[k][j] * y[j]);
         return net;
+    }
+
+    private void writeOutputLine(String line) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("output.txt", true));
+
+            bw.write(line);
+            bw.newLine();
+
+            bw.close();
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     private double Fan(double net) {
